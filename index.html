@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Web Box</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Live page -->
+  <div id="stage" hidden>
+    <iframe id="frame" title="Embedded page"
+            allow="fullscreen; clipboard-read; clipboard-write"
+            referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+
+  <!-- First run / edit URL -->
+  <form id="setup" hidden autocomplete="off">
+    <div class="card">
+      <h1>Web Box</h1>
+      <p>Paste a link. For Tableau, a dashboard link, its share link or its embed code all work.</p>
+      <input id="urlInput" type="text" spellcheck="false" placeholder="https://analytics.example.com/views/Workbook/Dashboard">
+      <p id="urlError" class="error" role="alert"></p>
+      <label class="check"><input id="tableauFix" type="checkbox" checked> Tidy Tableau links for embedding</label>
+      <div class="row">
+        <button type="submit" class="primary">Show</button>
+        <button type="button" id="cancelSetup" hidden>Cancel</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Toolbar: collapsed "www" pill that expands on hover / click -->
+  <div id="bar" class="bar collapsed" hidden>
+    <button id="pill" class="pill" title="Show toolbar">www</button>
+    <div class="tools">
+      <button id="btnEdit"    title="Change link">&#9881;</button>
+      <span class="sep"></span>
+      <button id="btnBack"    title="Back">&#8592;</button>
+      <button id="btnFwd"     title="Forward">&#8594;</button>
+      <button id="btnReload"  title="Reload">&#8635;</button>
+      <span class="sep"></span>
+      <button id="btnZoomOut" title="Zoom out">&minus;</button>
+      <button id="btnZoomPct" class="pct" title="Reset zoom">100%</button>
+      <button id="btnZoomIn"  title="Zoom in">+</button>
+      <span class="sep"></span>
+      <button id="btnHome"    title="Back to the saved link">&#8962;</button>
+      <button id="btnOpen"    title="Open in browser">&#8599;</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
