@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Web Box sign in</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Office only lets a sign-in window start on the add-in's own site, so this page opens first
+       and sends the window on to the dashboard's site, where its normal sign-in runs. The sign-in
+       then stays with Excel, so the box can use it once this window is closed. -->
+  <div id="setup">
+    <div class="card">
+      <h1>Sign in</h1>
+      <p id="msg">Taking you to the sign-in page&hellip;</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var to = new URLSearchParams(location.search).get("to") || "";
+      var ok = false;
+      try { ok = new URL(to).protocol === "https:"; } catch (e) {}
+      if (ok) { location.replace(to); }
+      else { document.getElementById("msg").textContent = "No https:// link was given. Close this window."; }
+    })();
+  </script>
+</body>
+</html>

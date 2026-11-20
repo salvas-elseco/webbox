@@ -128,6 +128,68 @@
     window.open(url, "_blank", "noopener");
   }
 
+  /* ---------- sign in ----------
+     Tableau can't show a company sign-in inside a framed page, so its own "Sign in" button opens a
+     pop-up. Inside Excel that pop-up can land in another browser, so the box never gets the sign-in
+     and the pop-up hangs on "You may close this window now". Instead, sign in through an Office
+     dialog: a window Excel opens itself, which keeps the sign-in where the box can use it. */
+  var noteTimer = null;
+  function note(text, ms) {
+    var el = $("note");
+    clearTimeout(noteTimer);
+    el.textContent = text || "";
+    el.hidden = !text;
+    if (text && ms) { noteTimer = setTimeout(function () { el.hidden = true; }, ms); }
+  }
+
+  function reloadFrame() {
+    var u = state.url;
+    frame.setAttribute("src", "about:blank");
+    setTimeout(function () { frame.setAttribute("src", u); }, 30);
+  }
+
+  // The page as a normal (not embedded) page, so Tableau runs its usual sign-in, not the pop-up one.
+  function signInTarget(url) {
+    try {
+      var u = new URL(url);
+      var q = u.search.replace(/^\?/, "").split("&").filter(function (part) {
+        if (!part) { return false; }
+        var k = decodeURIComponent(part.split("=")[0]);
+        return k !== ":embed" && k !== ":showVizHome";
+      });
+      return u.origin + u.pathname + (q.length ? "?" + q.join("&") : "") + u.hash;
+    } catch (e) { return url; }
+  }
+
+  function signIn() {
+    if (!state.url) { return; }
+    var target = signInTarget(state.url);
+    var dialogOk = false;
+    try { dialogOk = state.inOffice && Office.context.requirements.isSetSupported("DialogApi", "1.1"); } catch (e) {}
+    if (!dialogOk) {
+      window.open(target, "_blank");
+      note("Sign in in the new window, then press reload (↻) here.", 8000);
+      return;
+    }
+    // Office only opens a dialog on the add-in's own site; signin.html then sends it on to the target.
+    var page = new URL("signin.html", location.href);
+    page.searchParams.set("to", target);
+    Office.context.ui.displayDialogAsync(page.toString(), { height: 75, width: 60, promptBeforeOpen: false }, function (r) {
+      if (r.status !== Office.AsyncResultStatus.Succeeded) {
+        var code = r.error && r.error.code;
+        note(code === 12007 ? "A sign-in window is already open. Finish there and close it."
+                            : "Couldn't open the sign-in window (" + (r.error && r.error.message || code) + ").", 10000);
+        return;
+      }
+      note("Sign in in the window that opened. When the dashboard shows there, close that window.");
+      // Fires when the user closes the window (12006) or it can't load a page; either way, try the box again.
+      r.value.addEventHandler(Office.EventType.DialogEventReceived, function () {
+        note("");
+        reloadFrame();
+      });
+    });
+  }
+
   /* ---------- wiring ---------- */
   function wire() {
     setup.addEventListener("submit", function (e) {
@@ -146,7 +208,8 @@
     // The parent's history includes the frame's navigations, so this steps the embedded page back/forward.
     $("btnBack").addEventListener("click", function () { history.back(); });
     $("btnFwd").addEventListener("click", function () { history.forward(); });
-    $("btnReload").addEventListener("click", function () { var u = state.url; frame.setAttribute("src", "about:blank"); setTimeout(function () { frame.setAttribute("src", u); }, 30); });
+    $("btnReload").addEventListener("click", reloadFrame);
+    $("btnSignIn").addEventListener("click", signIn);
     $("btnHome").addEventListener("click", function () { frame.setAttribute("src", "about:blank"); setTimeout(function () { frame.setAttribute("src", state.url); }, 30); });
     $("btnZoomOut").addEventListener("click", function () { stepZoom(-1); });
     $("btnZoomIn").addEventListener("click", function () { stepZoom(1); });

@@ -43,4 +43,8 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 .tools button { border: 0; border-radius: 999px; min-width: 28px; height: 28px; padding: 0 6px; font-size: 15px; }
 .tools button:hover { background: rgba(127,127,127,.18); }
 .tools .pct { font-size: 12px; min-width: 44px; }
+.tools .txt { font-size: 12px; font-weight: 600; color: var(--accent); }
+.note { position: fixed; top: 46px; left: 6px; z-index: 10; max-width: min(420px, calc(100% - 12px));
+  padding: 8px 12px; border-radius: 8px; background: var(--bar); border: 1px solid var(--line);
+  box-shadow: 0 2px 8px rgba(0,0,0,.18); font-size: 13px; }
 .sep { width: 1px; height: 18px; background: var(--line); margin: 0 3px; }
